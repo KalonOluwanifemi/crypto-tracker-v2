@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reactapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KalonOluwanifemi/crypto-tracker-v2.git
+    targetRevision: main
+    path: k8s/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: react-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
