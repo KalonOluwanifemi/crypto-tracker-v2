@@ -5,4 +5,4 @@ resources:
 images:
   - name: react-app
     newName: kalonacr.azurecr.io/crypto-tracker-image
-    newTag: v1.01
+    newTag: latest
