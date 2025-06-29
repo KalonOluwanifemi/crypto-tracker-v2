@@ -1,0 +1,45 @@
+name: Build and Deploy React App
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ACR_NAME: kalonACR
+  IMAGE_NAME: crypto-tracker-image
+  ACR_LOGIN_SERVER: kalonacr.azurecr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to ACR
+        run: az acr login --name $ACR_NAME
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+
+      - name: Update Kubernetes manifests
+        run: |
+          sed -i "s|newTag:.*|newTag: latest|" k8s/kustomization.yaml
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git commit -am "Update image tag to latest"
+          git push
